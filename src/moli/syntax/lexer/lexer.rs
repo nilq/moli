@@ -34,6 +34,7 @@ pub fn lexer(data: &mut Chars) -> Lexer {
         "%",
         "^",
         "and",
+        "not",
         "or",
         ">",
         "<",
