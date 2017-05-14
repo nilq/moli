@@ -156,3 +156,34 @@ impl Matcher for StringLiteralMatcher {
         token!(tokenizer, StringLiteral, string)
     }
 }
+
+/// A matcher that matches constant elements of a specified token type
+pub struct ConstantMatcher {
+    token_type: TokenType,
+    constants: Vec<String>,
+}
+
+impl ConstantMatcher {
+    pub fn new(token_type: TokenType, constants: Vec<String>) -> Self {
+        ConstantMatcher {
+            token_type: token_type,
+            constants: constants,
+        }
+    }
+}
+
+impl Matcher for ConstantMatcher {
+    fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token> {
+        for constant in self.constants.clone() {
+            let dat = tokenizer.clone().take(constant.len());
+            if dat.size_hint().1.unwrap() != constant.len() {
+                return None;
+            }
+            if dat.collect::<String>() == constant {
+                tokenizer.advance(constant.len());
+                return token!(tokenizer, self.token_type.clone(), constant)
+            }
+        }
+        None
+    }
+}
