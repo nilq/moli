@@ -1,20 +1,21 @@
 mod moli;
 use moli::syntax;
-use syntax::lexer;
+
+use syntax::{lexer, parser};
 
 use lexer::{BlockTree, process_branch};
+use parser::{Traveler, Parser};
 
-fn main() {
+fn test() {
     let test = r#"
-str foo = r"some string"
-i08 boo = 8
+.123
+-123
+1234
 
-bar = .1234
-baz = -1234
+true
+false
 
-~ a comment here
-if bar == baz
-  hrm = r'hey'
+100 + 100 * 100 % .123 * .1 
     "#;
 
     let mut blocks = BlockTree::new(test, 0);
@@ -23,5 +24,14 @@ if bar == baz
     let root = blocks.tree(&indents);
     let done = process_branch(&root);
 
-    println!("lexed =>\n{:#?}", done)
+    let traveler = Traveler::new(done);
+    let mut parser = Parser::new(traveler);
+
+    for e in parser.parse() {
+        println!("{:#?}", e)
+    }
+}
+
+fn main() {
+    test()
 }

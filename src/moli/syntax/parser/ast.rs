@@ -3,6 +3,7 @@ pub enum Expression {
     IntLiteral(i64),
     FloatLiteral(f64),
     StringLiteral(String),
+    BoolLiteral(bool),
 
     Identifier(String),
     Call(Box<Vec<Expression>>),
