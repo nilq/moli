@@ -65,3 +65,36 @@ impl Matcher for IntLiteralMatcher {
         }
     }
 }
+
+/// A matcher that matches float literals
+pub struct FloatLiteralMatcher;
+
+impl Matcher for FloatLiteralMatcher {
+    fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token> {
+        let mut accum = String::new();
+        let curr = tokenizer.next().unwrap();
+        if curr.is_digit(10) {
+            accum.push(curr)
+        } else if curr == '.' {
+            accum.push_str("0.")
+        } else {
+            return None
+        }
+        while !tokenizer.end() {
+            let current = *tokenizer.peek().unwrap();
+            if !current.is_whitespace() && current.is_digit(10) || current == '.' {
+                if current == '.' && accum.contains('.') {
+                    panic!("illegal decimal point")
+                }
+                accum.push(tokenizer.next().unwrap())
+            } else {
+                break
+            }
+        }
+        if accum.contains('.') {
+            token!(tokenizer, FloatLiteral, accum)
+        } else {
+            token!(tokenizer, IntLiteral, accum)
+        }
+    }
+}
