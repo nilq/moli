@@ -16,6 +16,7 @@ pub trait Matcher {
     fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token>;
 }
 
+/// A matcher that only matches white-space
 pub struct WhitespaceMatcher;
 
 impl Matcher for WhitespaceMatcher {
@@ -27,6 +28,38 @@ impl Matcher for WhitespaceMatcher {
         }
         if found {
             token!(tokenizer, Whitespace, String::new())
+        } else {
+            None
+        }
+    }
+}
+
+/// A matcher that matches base-10 integer literals
+pub struct IntLiteralMatcher {}
+
+impl Matcher for IntLiteralMatcher {
+    fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token> {
+        let mut accum = String::new();
+        let negative = tokenizer.peek() == Some(&'-');
+        if negative {
+            tokenizer.advance(1)
+        };
+        while !tokenizer.end() && tokenizer.peek().unwrap().is_digit(10) {
+            accum.push(tokenizer.next().unwrap());
+        }
+        if !accum.is_empty() {
+            let literal: String = if negative {
+                match i64::from_str_radix(accum.as_str(), 10) {
+                    Ok(result) => format!("-{}", result),
+                    Err(error) => panic!("unable to parse int-literal: {}", error)
+                }
+            } else {
+                match u64::from_str_radix(accum.as_str(), 10) {
+                    Ok(result) => result.to_string(),
+                    Err(error) => panic!("unable to parse int-literal: {}", error)
+                }
+            };
+            token!(tokenizer, IntLiteral, literal)
         } else {
             None
         }
