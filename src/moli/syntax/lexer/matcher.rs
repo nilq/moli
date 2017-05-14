@@ -15,3 +15,20 @@ macro_rules! token {
 pub trait Matcher {
     fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token>;
 }
+
+pub struct WhitespaceMatcher;
+
+impl Matcher for WhitespaceMatcher {
+    fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token> {
+        let mut found = false;
+        while !tokenizer.end() && tokenizer.peek().unwrap().is_whitespace() {
+            found = true;
+            tokenizer.next();
+        }
+        if found {
+            token!(tokenizer, Whitespace, String::new())
+        } else {
+            None
+        }
+    }
+}
