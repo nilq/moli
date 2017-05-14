@@ -36,13 +36,26 @@ pub enum Statement {
 
 #[derive(Debug, Clone)]
 pub enum Type {
-    Str, Int, Float, Bool, Obj,
+    Str,
+    Int08,
+    Int16,
+    Int32,
+    Float,
+    Bool,
+    Obj,
 }
 
 impl Type {
     pub fn from_str(s: &str) -> Type {
         match s {
-            "str" => Type::Str,
+            "str"   => Type::Str,
+            "i08"   => Type::Int08,
+            "i16"   => Type::Int16,
+            "i32"   => Type::Int32,
+            "float" => Type::Float,
+            "int"   => Type::Int32,
+            "bool"  => Type::Bool,
+            "obj"   => Type::Obj,
             t => panic!("non-existing type: {}", t),
         }
     }
