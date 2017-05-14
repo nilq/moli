@@ -62,6 +62,17 @@ impl Parser {
             TokenType::BoolLiteral   => Expression::BoolLiteral(self.traveler.current_content() == "true"),
             TokenType::StringLiteral => Expression::StringLiteral(self.traveler.current_content().clone()),
             TokenType::Identifier    => Expression::Identifier(self.traveler.current_content()),
+            TokenType::Symbol => match self.traveler.current_content().as_str() {
+                "(" => {
+                    self.traveler.next();
+                    let expr = self.expression();
+                    self.traveler.next();
+                    self.traveler.expect_content(")");
+                    
+                    expr
+                },
+                _ => panic!("unexpected symbol: {}", self.traveler.current_content()),
+            },
             _ => panic!("unexpected: '{}'", self.traveler.current_content()),
         }
     }
@@ -87,14 +98,14 @@ impl Parser {
 
                 let (op, precedence) = operand(&self.traveler.current_content()).unwrap();
 
-                if precedence > op_stack.last().unwrap().1 {
-                    let right = ex_stack.pop().unwrap();
+                if precedence >= op_stack.last().unwrap().1 {
                     let left  = ex_stack.pop().unwrap();
+                    let right = ex_stack.pop().unwrap();
 
                     ex_stack.push(Expression::Operation {
-                        left:  Box::new(left),
+                        right:  Box::new(left),
                         op:    op_stack.pop().unwrap().0,
-                        right: Box::new(right)
+                        left: Box::new(right)
                     });
 
                     self.traveler.next();
@@ -111,13 +122,13 @@ impl Parser {
                 op_stack.push((op, precedence));
             }
 
-            let right = ex_stack.pop().unwrap();
             let left  = ex_stack.pop().unwrap();
+            let right = ex_stack.pop().unwrap();
 
             ex_stack.push(Expression::Operation {
-                left:  Box::new(left),
+                right:  Box::new(left),
                 op:    op_stack.pop().unwrap().0,
-                right: Box::new(right)
+                left: Box::new(right)
             });
         }
 

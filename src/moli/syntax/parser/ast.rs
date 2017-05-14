@@ -44,6 +44,8 @@ pub enum Operand {
     Gt,
     LtEquals,
     GtEquals,
+    And,
+    Or,
 }
 
 pub fn operand(v: &str) -> Option<(Operand, u8)> {
@@ -60,6 +62,8 @@ pub fn operand(v: &str) -> Option<(Operand, u8)> {
         ">"  => Some((Operand::Gt, 4)),
         "<=" => Some((Operand::LtEquals, 4)),
         ">=" => Some((Operand::GtEquals, 4)),
+        "and" => Some((Operand::And, 4)),
+        "or" => Some((Operand::Or, 4)),
         _ => None,
     }
 }

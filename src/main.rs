@@ -59,8 +59,8 @@ fn repl() {
 
 fn test() {
     let test = r#"
-a + b + c
-    "#;
+a * b + c * d * (a + b) / 2
+"#;
 
     let mut blocks = BlockTree::new(test, 0);
     let indents    = blocks.indents();

@@ -91,8 +91,8 @@ pub fn lexer(data: &mut Chars) -> Lexer {
     lexer.matchers_mut().push(Box::new(matcher_boolean));
     lexer.matchers_mut().push(Box::new(matcher_types));    
     lexer.matchers_mut().push(Box::new(matcher_keyword));
+    lexer.matchers_mut().push(Box::new(matcher_operator));    
     lexer.matchers_mut().push(Box::new(matcher_identifier));
-    lexer.matchers_mut().push(Box::new(matcher_operator));
     lexer.matchers_mut().push(Box::new(matcher_symbol));
     lexer
 }
