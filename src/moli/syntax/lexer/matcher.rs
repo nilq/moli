@@ -187,3 +187,26 @@ impl Matcher for ConstantMatcher {
         None
     }
 }
+
+/// A matcher that matches identifiers
+pub struct IdentifierMatcher;
+
+impl Matcher for IdentifierMatcher {
+    fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token> {
+        let mut identifier = String::new();
+        let curr = tokenizer.next().unwrap();
+        while !tokenizer.end() {
+            let current = *tokenizer.peek().unwrap();
+            if !current.is_whitespace() && ("_@?".contains(current) || current.is_alphanumeric()) {
+                identifier.push(tokenizer.next().unwrap());
+            } else {
+                break
+            }
+        }
+        if !identifier.is_empty() {
+            token!(tokenizer, Identifier, identifier)
+        } else {
+            None
+        }
+    }
+}
