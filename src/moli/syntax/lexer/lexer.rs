@@ -91,9 +91,9 @@ pub fn lexer(data: &mut Chars) -> Lexer {
     lexer.matchers_mut().push(Box::new(matcher_boolean));
     lexer.matchers_mut().push(Box::new(matcher_types));    
     lexer.matchers_mut().push(Box::new(matcher_keyword));
-    lexer.matchers_mut().push(Box::new(matcher_operator));    
+    lexer.matchers_mut().push(Box::new(matcher_symbol));    
+    lexer.matchers_mut().push(Box::new(matcher_operator));  
     lexer.matchers_mut().push(Box::new(matcher_identifier));
-    lexer.matchers_mut().push(Box::new(matcher_symbol));
     lexer
 }
 
@@ -103,7 +103,7 @@ pub fn lex_branch(branch: &Branch) -> Branch {
         match c.value() {
             &ChunkValue::Source(ref s) => {
                 let mut line: Vec<Token> = lexer(&mut s.clone().chars()).collect();
-                line.push(Token::new(TokenType::EOL, TokenPosition::default(), "\\n".to_owned()));
+                line.push(Token::new(TokenType::EOL, TokenPosition::default(), "\n".to_owned()));
 
                 let chunk = ChunkValue::Tokens(line);
                 lexed_branch.value.push(Chunk::new(chunk))

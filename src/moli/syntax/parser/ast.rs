@@ -1,5 +1,7 @@
 #[derive(Debug, Clone)]
 pub enum Expression {
+    Block(Box<Vec<Statement>>),
+
     IntLiteral(i64),
     FloatLiteral(f64),
     StringLiteral(String),
@@ -7,11 +9,11 @@ pub enum Expression {
 
     Identifier(String),
     Call(Box<Vec<Expression>>),
-    
+
     Function {
-        name: Option<String>,
-        args: Vec<String>,
-        body: Vec<Statement>,
+        params: Vec<(Type, String)>,
+        ret: Type,
+        body:   Vec<Statement>,
     },
 
     Operation {
@@ -19,11 +21,12 @@ pub enum Expression {
         op:    Operand,
         right: Box<Expression>,
     },
+    
+    EOF,    
 }
 
 #[derive(Debug, Clone)]
 pub enum Statement {
-    Block(Box<Vec<Statement>>),
     Expression(Box<Expression>),
 
     Definition(String, Box<Expression>, Type),
@@ -31,7 +34,7 @@ pub enum Statement {
     
     If(Box<Expression>, Box<Vec<Statement>>),
     
-    Return(Option<Box<Expression>>),    
+    Return(Option<Box<Expression>>),
 }
 
 #[derive(Debug, Clone)]
@@ -46,6 +49,7 @@ pub enum Type {
     Bool,
     Obj,
     Table,
+    Any,
 }
 
 impl Type {

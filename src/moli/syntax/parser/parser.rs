@@ -42,7 +42,7 @@ impl Parser {
             TokenType::Keyword => match self.traveler.current_content().as_str() {
                 "return" => {
                     self.traveler.next();
-                    if self.traveler.current().token_type == TokenType::EOL {
+                    if self.traveler.current_content() == "\n" {
                         self.traveler.next(); // skip \n
                         Statement::Return(None)
                     } else {
@@ -83,6 +83,13 @@ impl Parser {
     #[allow(unused_must_use)]
     fn atom(&mut self) -> Expression {
         match self.traveler.current().token_type.clone() {
+            TokenType::EOL => {
+                self.traveler.next();
+                match self.traveler.current().token_type {
+                    TokenType::Block(_) => Expression::Block(Box::new(self.block())),
+                    _                   => Expression::EOF,
+                }
+            },
             TokenType::IntLiteral    => Expression::IntLiteral(self.traveler.current_content().parse::<i64>().unwrap()),
             TokenType::FloatLiteral  => Expression::FloatLiteral(self.traveler.current_content().parse::<f64>().unwrap()),
             TokenType::BoolLiteral   => Expression::BoolLiteral(self.traveler.current_content() == "true"),
@@ -96,6 +103,60 @@ impl Parser {
                     self.traveler.expect_content(")");
                     
                     expr
+                },
+                "[" => {
+                    self.traveler.next();
+
+                    let mut ret = Type::Any;
+                    let mut params = Vec::new();
+
+                    loop {
+                        match self.traveler.current().token_type {
+                            TokenType::Identifier => {
+                                params.push((Type::Any, self.traveler.current_content()));
+                                self.traveler.next(); // skip id
+                            },
+                            TokenType::Type => {
+                                let t = self.traveler.current_content();
+                                self.traveler.next();
+                                let id = self.traveler.expect(TokenType::Identifier).unwrap();
+                                self.traveler.next();
+
+                                params.push((Type::from_str(&t), id))
+                            },
+                            TokenType::Symbol => match self.traveler.current_content().as_str() {
+                                ","  => { self.traveler.next(); },
+                                "->" => {
+                                    self.traveler.next();
+                                    let t = self.traveler.expect(TokenType::Type).unwrap();
+                                    self.traveler.next();
+                                    
+                                    ret = Type::from_str(&t)
+                                },
+                                "]" => {
+                                    self.traveler.next();
+                                    break
+                                },
+                                s => panic!("unexpected symbol: {}", s),
+                            },
+                            _ => panic!("unexpected '{}' in function signature", self.traveler.current_content()) 
+                        }
+                    }
+
+                    let body: Vec<Statement>;
+
+                    if self.traveler.current_content() == "\n" {
+                        self.traveler.next();
+                        body = self.block();
+                    } else {
+                        body = vec!(Statement::Expression(Box::new(self.expression())));
+                    }
+
+                    Expression::Function {
+                        params,
+                        ret,
+                        body,
+                    }
                 },
                 _ => panic!("unexpected symbol: {}", self.traveler.current_content()),
             },
