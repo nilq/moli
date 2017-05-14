@@ -40,9 +40,12 @@ pub enum Type {
     Int08,
     Int16,
     Int32,
-    Float,
+    Int64,
+    Float32,
+    Float64,
     Bool,
     Obj,
+    Table,
 }
 
 impl Type {
@@ -52,10 +55,13 @@ impl Type {
             "i08"   => Type::Int08,
             "i16"   => Type::Int16,
             "i32"   => Type::Int32,
-            "float" => Type::Float,
+            "i64"   => Type::Int64,
+            "f32"   => Type::Float32,
+            "f64"   => Type::Float64,
             "int"   => Type::Int32,
             "bool"  => Type::Bool,
             "obj"   => Type::Obj,
+            "table" => Type::Table,
             t => panic!("non-existing type: {}", t),
         }
     }

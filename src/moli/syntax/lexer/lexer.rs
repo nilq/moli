@@ -102,7 +102,10 @@ pub fn lex_branch(branch: &Branch) -> Branch {
     for c in branch.value.iter() {
         match c.value() {
             &ChunkValue::Source(ref s) => {
-                let chunk = ChunkValue::Tokens(lexer(&mut s.clone().chars()).collect());
+                let mut line: Vec<Token> = lexer(&mut s.clone().chars()).collect();
+                line.push(Token::new(TokenType::EOL, TokenPosition::default(), "\\n".to_owned()));
+
+                let chunk = ChunkValue::Tokens(line);
                 lexed_branch.value.push(Chunk::new(chunk))
             },
             &ChunkValue::Block(ref b) => {

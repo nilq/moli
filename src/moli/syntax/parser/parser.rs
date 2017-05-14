@@ -39,6 +39,21 @@ impl Parser {
 
                 Statement::Definition(id, Box::new(expr), Type::from_str(&t))
             },
+            TokenType::Keyword => match self.traveler.current_content().as_str() {
+                "return" => {
+                    self.traveler.next();
+                    if self.traveler.current().token_type == TokenType::EOL {
+                        self.traveler.next(); // skip \n
+                        Statement::Return(None)
+                    } else {
+                        let expr = self.expression();
+                        self.traveler.next(); // skip \n
+                        Statement::Return(Some(Box::new(expr)))
+                    }
+                },
+
+                _ => panic!("unexpected keyword: {}", self.traveler.current_content()),
+            },
             _ => Statement::Expression(Box::new(self.expression())),
         }
     }

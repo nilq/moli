@@ -14,6 +14,7 @@ pub enum TokenType {
     Keyword,
 
     Whitespace,
+    EOL,
     EOF,
 }
 
