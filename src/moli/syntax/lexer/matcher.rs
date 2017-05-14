@@ -108,11 +108,13 @@ impl Matcher for StringLiteralMatcher {
         let delimeter  = match tokenizer.peek().unwrap() {
             &'"'  => Some('"'),
             &'\'' => Some('\''),
-            &'r' if tokenizer.peek_n(1) == Some(&'"') => {
-                raw_marker = true;
-                tokenizer.advance(1); // Skips prefix
-
-                Some('"')
+            &'r' => match *tokenizer.peek_n(1).unwrap() {
+                c @ '"' | c @ '\'' => {
+                    raw_marker = true;
+                    tokenizer.advance(1); // Skips prefix
+                    Some(c)
+                },
+                _ => return None,
             },
             _ => return None,
         };
@@ -124,7 +126,8 @@ impl Matcher for StringLiteralMatcher {
                 break
             }
             if raw_marker {
-                if tokenizer.peek().unwrap() == &'"' {
+                let c = *tokenizer.peek().unwrap();
+                if c == '"' || c == '\'' {
                     break
                 }
                 string.push(tokenizer.next().unwrap())
@@ -194,7 +197,6 @@ pub struct IdentifierMatcher;
 impl Matcher for IdentifierMatcher {
     fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token> {
         let mut identifier = String::new();
-        let curr = tokenizer.next().unwrap();
         while !tokenizer.end() {
             let current = *tokenizer.peek().unwrap();
             if !current.is_whitespace() && ("_@?".contains(current) || current.is_alphanumeric()) {
