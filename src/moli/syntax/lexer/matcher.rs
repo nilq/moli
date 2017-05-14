@@ -91,7 +91,9 @@ impl Matcher for FloatLiteralMatcher {
                 break
             }
         }
-        if accum.contains('.') {
+        if accum == "0.".to_owned() {
+            None
+        } else if accum.contains('.') {
             token!(tokenizer, FloatLiteral, accum)
         } else {
             token!(tokenizer, IntLiteral, accum)

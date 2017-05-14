@@ -1,6 +1,6 @@
 use super::Traveler;
 
-use super::{Expression, Statement, Operand, operand};
+use super::{Expression, Statement, Operand, Type, operand};
 
 use lexer::TokenType;
 
@@ -28,6 +28,17 @@ impl Parser {
     #[allow(unused_must_use)]
     fn statement(&mut self) -> Statement {
         match self.traveler.current().token_type {
+            TokenType::Type => {
+                let t = self.traveler.current_content();
+                self.traveler.next();
+                let id = self.traveler.expect(TokenType::Identifier).unwrap();
+                self.traveler.next();
+                self.traveler.expect_content("=");
+                self.traveler.next();
+                let expr = self.expression();
+
+                Statement::Definition(id, Box::new(expr), Type::from_str(&t))
+            },
             _ => Statement::Expression(Box::new(self.expression())),
         }
     }

@@ -51,17 +51,17 @@ impl Traveler {
         self.current().content().clone()
     }
 
-    pub fn expect(&self, token: TokenType) -> Result<&Token, String> {
+    pub fn expect(&self, token: TokenType) -> Result<String, String> {
         if self.current().token_type == token {
-            Ok(self.current())
+            Ok(self.current_content())
         } else {
             Err(format!("expected '{:?}', found '{:?}'", token, self.current_content()))
         }
     }
 
-    pub fn expect_content(&self, content: &str) -> Result<&Token, String> {
+    pub fn expect_content(&self, content: &str) -> Result<String, String> {
         if &self.current_content() == content {
-            Ok(self.current())
+            Ok(self.current_content())
         } else {
             Err(format!("expected '{}', found '{:#?}'", content, self.current()))
         }

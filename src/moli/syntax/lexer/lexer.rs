@@ -15,13 +15,11 @@ pub fn lexer(data: &mut Chars) -> Lexer {
         "[",
         "]",
         ",",
-        ".",
         ":",
         "!",
         "{",
         "}",
         "!",
-        "=",
         "->",
     ].iter().map(|&x| x.to_string()).collect();
 
@@ -37,12 +35,14 @@ pub fn lexer(data: &mut Chars) -> Lexer {
         "not",
         "or",
         ">",
+        "=",
         "<",
         ">=",
         "<=",
         "==",
         "!=",
         "..",
+        ".",
     ].iter().map(|&x| x.to_string()).collect();
 
     let keywords = vec![
