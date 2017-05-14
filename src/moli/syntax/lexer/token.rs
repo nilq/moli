@@ -5,7 +5,6 @@ pub enum TokenType {
     IntLiteral,
     FloatLiteral,
     StringLiteral,
-    CharLiteral,
     BoolLiteral,
     
     Symbol,

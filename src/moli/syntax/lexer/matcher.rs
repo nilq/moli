@@ -98,3 +98,61 @@ impl Matcher for FloatLiteralMatcher {
         }
     }
 }
+
+/// A matcher that matches string literals
+pub struct StringLiteralMatcher;
+
+impl Matcher for StringLiteralMatcher {
+    fn try_match(&self, tokenizer: &mut Tokenizer) -> Option<Token> {
+        let mut raw_marker = false;
+        let delimeter  = match tokenizer.peek().unwrap() {
+            &'"'  => Some('"'),
+            &'\'' => Some('\''),
+            &'r' if tokenizer.peek_n(1) == Some(&'"') => {
+                raw_marker = true;
+                tokenizer.advance(1); // Skips prefix
+
+                Some('"')
+            },
+            _ => return None,
+        };
+        tokenizer.advance(1); // Skips the opening delimeter
+        let mut string       = String::new();
+        let mut found_escape = false;
+        loop {
+            if tokenizer.end() {
+                break
+            }
+            if raw_marker {
+                if tokenizer.peek().unwrap() == &'"' {
+                    break
+                }
+                string.push(tokenizer.next().unwrap())
+            } else {
+                if found_escape {
+                    string.push(
+                        match tokenizer.next().unwrap() {
+                            c @ '\\' | c @ '\'' | c @ '"' => c,
+                            'n' => '\n',
+                            'r' => '\r',
+                            't' => '\t',
+                            s => panic!("unwanted character escape: {}", s),
+                        }
+                    );
+                    found_escape = false
+                } else {
+                    match tokenizer.peek().unwrap() {
+                        &'\\' => {
+                            tokenizer.next();
+                            found_escape = true
+                        },
+                        &c if &c == &delimeter.unwrap() => break,
+                        _ => string.push(tokenizer.next().unwrap()),
+                    }
+                }
+            }
+        }
+        tokenizer.advance(1); // Skips the closing delimeter
+        token!(tokenizer, StringLiteral, string)
+    }
+}
