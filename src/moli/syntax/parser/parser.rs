@@ -78,19 +78,16 @@ impl Parser {
 
         let mut done = false;
         while ex_stack.len() > 1 {
-
             if !done && self.traveler.next() {
                 if self.traveler.current().token_type != TokenType::Operator {
                     self.traveler.prev();
-
                     done = true;
-
                     continue
                 }
 
-                let (op, prec) = operand(&self.traveler.current_content()).unwrap();
+                let (op, precedence) = operand(&self.traveler.current_content()).unwrap();
 
-                if prec > op_stack.last().unwrap().1 {
+                if precedence > op_stack.last().unwrap().1 {
                     let right = ex_stack.pop().unwrap();
                     let left  = ex_stack.pop().unwrap();
 
@@ -103,7 +100,7 @@ impl Parser {
                     self.traveler.next();
 
                     ex_stack.push(self.atom());
-                    op_stack.push((op, prec));
+                    op_stack.push((op, precedence));
 
                     continue
                 }
@@ -111,7 +108,7 @@ impl Parser {
                 self.traveler.next();
 
                 ex_stack.push(self.atom());
-                op_stack.push((op, prec));
+                op_stack.push((op, precedence));
             }
 
             let right = ex_stack.pop().unwrap();

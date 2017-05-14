@@ -1,3 +1,9 @@
+extern crate rustyline;
+
+use rustyline::completion::FilenameCompleter;
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
+
 mod moli;
 use moli::syntax;
 
@@ -6,16 +12,54 @@ use syntax::{lexer, parser};
 use lexer::{BlockTree, process_branch};
 use parser::{Traveler, Parser};
 
+#[cfg(unix)]
+static PROMPT: &'static str = "\x1b[1;32m>>\x1b[0m ";
+
+#[cfg(windows)]
+static PROMPT: &'static str = ">> ";
+
+fn repl() {
+    let mut rl   = rustyline::Editor::<()>::new();
+
+    loop {
+        let readline = rl.readline(PROMPT);
+        match readline {
+            Ok(line) => {
+                let mut blocks = BlockTree::new(line.as_str(), 0);
+                let indents    = blocks.indents();
+
+                let root = blocks.tree(&indents);
+                let done = process_branch(&root);
+
+                let traveler = Traveler::new(done);
+                let mut parser = Parser::new(traveler);
+
+                for e in parser.parse() {
+                    println!("{:#?}", e)
+                }
+            }
+
+            Err(ReadlineError::Interrupted) => {
+                println!("interrupted");
+                break
+            }
+
+            Err(ReadlineError::Eof) => {
+                println!("eof");
+                break
+            }
+
+            Err(err) => {
+                println!("error: {:?}", err);
+                break
+            }
+        }
+    }
+}
+
 fn test() {
     let test = r#"
-.123
--123
-1234
-
-true
-false
-
-100 + 100 * 100 % .123 * .1 
+a + b + c
     "#;
 
     let mut blocks = BlockTree::new(test, 0);
@@ -33,5 +77,5 @@ false
 }
 
 fn main() {
-    test()
+    repl()
 }
