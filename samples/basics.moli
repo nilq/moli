@@ -1,0 +1,7 @@
+int a = 10 + 10
+str b = r"a raw string"
+
+c = "inferred string"
+c = r"new value"
+
+d = 10 + 100 * (100 / .2) * .1
