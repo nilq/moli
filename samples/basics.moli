@@ -5,3 +5,6 @@ c = "inferred string"
 c = r"new value"
 
 d = 10 + 100 * (100 / .2) * .1
+
+~ should
+foo = [i32 a ->i32] return 0

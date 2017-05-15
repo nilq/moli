@@ -32,7 +32,11 @@ pub enum Statement {
     Definition(String, Box<Expression>, Type),
     Assignment(Box<Expression>, Box<Expression>),
     
-    If(Box<Expression>, Box<Vec<Statement>>),
+    If {
+        cond: Box<Expression>,
+        body: Box<Vec<Statement>>,
+        else_body: Option<Box<Vec<Statement>>>,
+    },
     
     Return(Option<Box<Expression>>),
 }

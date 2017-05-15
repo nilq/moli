@@ -51,7 +51,6 @@ impl Parser {
                         Statement::Return(Some(Box::new(expr)))
                     }
                 },
-
                 _ => panic!("unexpected keyword: {}", self.traveler.current_content()),
             },
             _ => Statement::Expression(Box::new(self.expression())),
@@ -59,6 +58,10 @@ impl Parser {
     }
 
     fn expression(&mut self) -> Expression {
+        if self.traveler.current_content() == "\n" {
+            self.traveler.next();
+        }
+
         let expr = self.atom();
         self.traveler.next();
         if self.traveler.remaining() > 0 {
@@ -82,14 +85,19 @@ impl Parser {
 
     #[allow(unused_must_use)]
     fn atom(&mut self) -> Expression {
-        match self.traveler.current().token_type.clone() {
+        match self.traveler.current().token_type {
             TokenType::EOL => {
                 self.traveler.next();
                 match self.traveler.current().token_type {
-                    TokenType::Block(_) => Expression::Block(Box::new(self.block())),
-                    _                   => Expression::EOF,
+                    TokenType::Block(_) => return Expression::Block(Box::new(self.block())),
+                    TokenType::EOL      => return Expression::EOF,
+                    _ => (),
                 }
             },
+            _ => (),
+        }
+
+        match self.traveler.current().token_type {
             TokenType::IntLiteral    => Expression::IntLiteral(self.traveler.current_content().parse::<i64>().unwrap()),
             TokenType::FloatLiteral  => Expression::FloatLiteral(self.traveler.current_content().parse::<f64>().unwrap()),
             TokenType::BoolLiteral   => Expression::BoolLiteral(self.traveler.current_content() == "true"),
@@ -103,6 +111,9 @@ impl Parser {
                     TokenType::Symbol => match self.traveler.current_content().as_str() {
                         "(" => return self.call(expr),
                         _ => (),
+                    },
+                    TokenType::EOL => {
+                        self.traveler.next();
                     },
                     _ => panic!("unexpected: {}", self.traveler.current_content()),
                 }
@@ -207,8 +218,11 @@ impl Parser {
         let mut op_stack: Vec<(Operand, u8)> = Vec::new();
 
         op_stack.push(operand(&self.traveler.current_content()).unwrap());
-
         self.traveler.next();
+
+        if self.traveler.current_content() == "\n" {
+            self.traveler.next();
+        }
 
         ex_stack.push(self.atom());
 

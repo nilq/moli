@@ -61,7 +61,8 @@ fn repl() {
 #[allow(dead_code)]
 fn test() {
     let test = r#"
-a * b + c * d * (a + b) / 2
+foo = [i32 a, i32 b ->i32]
+  return a + b
 "#;
 
     let mut blocks = BlockTree::new(test, 0);
@@ -79,5 +80,5 @@ a * b + c * d * (a + b) / 2
 }
 
 fn main() {
-    repl()
+    test()
 }
